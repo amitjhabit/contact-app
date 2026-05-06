@@ -10,15 +10,16 @@
     "db:migrate": "node scripts/migrate.js"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.9.3",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18",
-    "@neondatabase/serverless": "^0.9.3"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "dotenv": "^17.4.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.3"
   }
