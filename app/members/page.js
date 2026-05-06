@@ -517,16 +517,6 @@ export default function MembersPage() {
           <button className="btn btn-ghost btn-sm" onClick={() => fetchMembers()}>↻ Refresh</button>
         </div>
 
-        {/* Table */}
-        {loading ? (
-          <div className="loading"><span className="spinner" /> Loading members…</div>
-        ) : members.length === 0 ? (
-          <div className="empty">
-            <div className="icon">👤</div>
-            <p>No members found.</p>
-            <button className="btn btn-primary btn-sm" style={{ marginTop:'1rem' }} onClick={() => setShowAdd(true)}>+ Add First Member</button>
-          </div>
-
         {/* Member Cards - Edit/Delete always visible */}
         {loading ? (
           <div className="loading"><span className="spinner" /> Loading members…</div>
@@ -616,7 +606,6 @@ export default function MembersPage() {
               </div>
             )}
           </>
-        )}
         )}
 
         <div className="mt-8" style={{ textAlign:'center' }}>
