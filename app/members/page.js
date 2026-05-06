@@ -526,117 +526,86 @@ export default function MembersPage() {
             <p>No members found.</p>
             <button className="btn btn-primary btn-sm" style={{ marginTop:'1rem' }} onClick={() => setShowAdd(true)}>+ Add First Member</button>
           </div>
+
+        {/* Member Cards - Edit/Delete always visible */}
+        {loading ? (
+          <div className="loading"><span className="spinner" /> Loading members…</div>
+        ) : members.length === 0 ? (
+          <div className="empty">
+            <div className="icon">👤</div>
+            <p>No members found.</p>
+            <button className="btn btn-primary btn-sm" style={{ marginTop:'1rem' }} onClick={() => setShowAdd(true)}>+ Add First Member</button>
+          </div>
         ) : (
           <>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Member</th>
-                    <th>Contact</th>
-                    <th>Location</th>
-                    <th>DOB / Age</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Is Active</th>
-                    <th>Joined</th>
-                    <th>Expires</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((m) => {
-                    const tm = TYPE_META[m.membership_type] || TYPE_META.basic;
-                    const sm = STATUS_META[m.membership_status] || STATUS_META.inactive;
-                    const age = calcAge(m.date_of_birth);
-                    const expired = m.expiry_date && new Date(m.expiry_date) < new Date();
-                    return (
-                      <tr key={m.id}>
-                        <td className="text-xs text-muted">{m.id}</td>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px,1fr))', gap:'1rem', marginBottom:'2rem' }}>
+              {members.map((m) => {
+                const tm = TYPE_META[m.membership_type] || TYPE_META.basic;
+                const sm = STATUS_META[m.membership_status] || STATUS_META.inactive;
+                const age = calcAge(m.date_of_birth);
+                const expired = m.expiry_date && new Date(m.expiry_date) < new Date();
+                return (
+                  <div key={m.id} style={{ background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:'var(--radius-lg)', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'.75rem' }}>
 
-                        {/* Name + photo */}
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <div style={{ width:34, height:34, borderRadius:'50%', background:tm.bg, border:`1px solid ${tm.color}44`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.75rem', fontWeight:700, color:tm.color, flexShrink:0, overflow:'hidden' }}>
-                              {m.photo_url
-                                ? <img src={m.photo_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e)=>{e.target.style.display='none';}} />
-                                : `${m.first_name[0]}${m.last_name[0]}`}
-                            </div>
-                            <div>
-                              <div style={{ fontWeight:600, fontSize:'.875rem', whiteSpace:'nowrap' }}>{m.first_name} {m.last_name}</div>
-                              {m.gender && <div className="text-xs text-muted" style={{ textTransform:'capitalize' }}>{m.gender.replace(/_/g,' ')}</div>}
-                            </div>
-                          </div>
-                        </td>
+                    {/* Header: avatar + name + active toggle */}
+                    <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'.7rem' }}>
+                        <div style={{ width:46, height:46, borderRadius:'50%', background:tm.bg, border:`2px solid ${tm.color}55`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem', fontWeight:800, color:tm.color, fontFamily:'var(--sans)', flexShrink:0, overflow:'hidden' }}>
+                          {m.photo_url ? <img src={m.photo_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e)=>{e.target.style.display='none';}} /> : `${m.first_name[0]}${m.last_name[0]}`}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily:'var(--sans)', fontWeight:700, fontSize:'1rem' }}>{m.first_name} {m.last_name}</div>
+                          <div style={{ fontSize:'.7rem', color:'var(--text-muted)' }}>#{m.id}{age ? ` · ${age} yrs` : ''}{m.gender ? ` · ${m.gender.replace(/_/g,' ')}` : ''}</div>
+                        </div>
+                      </div>
+                      {/* Active toggle */}
+                      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'.25rem' }}>
+                        <div onClick={() => toggleActive(m)} title="Toggle active" style={{ width:42, height:23, borderRadius:12, background: m.is_member_active ? 'var(--accent)' : 'var(--bg-3)', border:'1px solid '+(m.is_member_active ? 'var(--accent)' : 'var(--border-hi)'), position:'relative', cursor:'pointer', transition:'.2s' }}>
+                          <div style={{ width:17, height:17, borderRadius:'50%', background: m.is_member_active ? '#0d0d0f' : 'var(--text-dim)', position:'absolute', top:2, left: m.is_member_active ? 21 : 2, transition:'.2s' }} />
+                        </div>
+                        <span style={{ fontSize:'.6rem', color: m.is_member_active ? 'var(--accent)' : 'var(--text-dim)', textTransform:'uppercase', letterSpacing:'.06em' }}>{m.is_member_active ? 'Active' : 'Off'}</span>
+                      </div>
+                    </div>
 
-                        <td>
-                          <div className="text-sm truncate" style={{ maxWidth:180 }}>{m.email}</div>
-                          {m.phone && <div className="text-xs text-muted">{m.phone}</div>}
-                        </td>
+                    {/* Contact info */}
+                    <div style={{ display:'flex', flexDirection:'column', gap:'.3rem' }}>
+                      <div style={{ fontSize:'.82rem', color:'var(--text-muted)' }}>✉ <span style={{ color:'var(--text)' }}>{m.email}</span></div>
+                      {m.phone    && <div style={{ fontSize:'.82rem', color:'var(--text-muted)' }}>☎ {m.phone}</div>}
+                      {(m.city || m.state) && <div style={{ fontSize:'.82rem', color:'var(--text-muted)' }}>📍 {[m.city, m.state, m.zip].filter(Boolean).join(', ')}</div>}
+                      {m.date_of_birth && <div style={{ fontSize:'.82rem', color:'var(--text-muted)' }}>🎂 {fmtDate(m.date_of_birth)}</div>}
+                    </div>
 
-                        <td className="text-sm text-muted" style={{ whiteSpace:'nowrap' }}>
-                          {[m.city, m.state].filter(Boolean).join(', ') || '—'}
-                          {m.zip && <div className="text-xs">{m.zip}</div>}
-                        </td>
+                    {/* Badges */}
+                    <div style={{ display:'flex', gap:'.4rem', flexWrap:'wrap' }}>
+                      <span className="badge" style={{ background:tm.bg, color:tm.color }}>{tm.label}</span>
+                      <span className={`badge ${sm.cls}`}>{sm.label}</span>
+                      {expired && <span className="badge" style={{ background:'rgba(255,77,109,.1)', color:'var(--danger)' }}>⚠ Expired</span>}
+                    </div>
 
-                        <td className="text-sm text-muted" style={{ whiteSpace:'nowrap' }}>
-                          {m.date_of_birth ? fmtDate(m.date_of_birth) : '—'}
-                          {age && <div className="text-xs">{age} yrs</div>}
-                        </td>
+                    {/* Dates */}
+                    <div style={{ fontSize:'.75rem', color:'var(--text-muted)', display:'flex', gap:'1rem' }}>
+                      <span>Joined: <b style={{ color:'var(--text)' }}>{fmtDate(m.joined_date)}</b></span>
+                      {m.expiry_date && <span>Expires: <b style={{ color: expired ? 'var(--danger)' : 'var(--text)' }}>{fmtDate(m.expiry_date)}</b></span>}
+                    </div>
 
-                        <td>
-                          <span className="badge" style={{ background:tm.bg, color:tm.color, whiteSpace:'nowrap' }}>
-                            {tm.label}
-                          </span>
-                        </td>
+                    {/* ══ ACTION BUTTONS — always visible ══ */}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'.5rem', borderTop:'1px solid var(--border)', paddingTop:'.85rem', marginTop:'auto' }}>
+                      <button className="btn btn-ghost btn-sm" style={{ justifyContent:'center', fontSize:'.8rem' }} onClick={() => setViewMember(m)}>
+                        👁 View
+                      </button>
+                      <button className="btn btn-primary btn-sm" style={{ justifyContent:'center', fontSize:'.8rem' }} onClick={() => setEditMember(m)}>
+                        ✏️ Edit
+                      </button>
+                      <button className="btn btn-danger btn-sm" style={{ justifyContent:'center', fontSize:'.8rem' }} onClick={() => handleDelete(m.id)}>
+                        🗑 Delete
+                      </button>
+                    </div>
 
-                        <td><span className={`badge ${sm.cls}`}>{sm.label}</span></td>
-
-                        {/* Is Member Active toggle */}
-                        <td>
-                          <div
-                            onClick={() => toggleActive(m)}
-                            title={`Click to ${m.is_member_active ? 'deactivate' : 'activate'}`}
-                            style={{
-                              width:40, height:22, borderRadius:11,
-                              background: m.is_member_active ? 'var(--accent)' : 'var(--bg-3)',
-                              border:'1px solid ' + (m.is_member_active ? 'var(--accent)' : 'var(--border-hi)'),
-                              position:'relative', cursor:'pointer', transition:'.2s',
-                            }}
-                          >
-                            <div style={{
-                              width:16, height:16, borderRadius:'50%',
-                              background: m.is_member_active ? '#0d0d0f' : 'var(--text-dim)',
-                              position:'absolute', top:2,
-                              left: m.is_member_active ? 20 : 2,
-                              transition:'.2s',
-                            }} />
-                          </div>
-                        </td>
-
-                        <td className="text-xs text-muted" style={{ whiteSpace:'nowrap' }}>{fmtDate(m.joined_date)}</td>
-
-                        <td className="text-xs" style={{ color: expired ? 'var(--danger)' : 'var(--text-muted)', whiteSpace:'nowrap' }}>
-                          {m.expiry_date ? fmtDate(m.expiry_date) : '—'}
-                          {expired && <div style={{ fontSize:'.65rem', color:'var(--danger)' }}>Expired</div>}
-                        </td>
-
-                        <td>
-                          <div className="flex gap-1">
-                            <button className="btn btn-ghost btn-sm" onClick={() => setViewMember(m)}>View</button>
-                            <button className="btn btn-ghost btn-sm" onClick={() => setEditMember(m)}>Edit</button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(m.id)}>✕</button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Pagination */}
             {pagination.pages > 1 && (
               <div className="flex items-center justify-between mt-4 text-sm text-muted">
                 <span>Page {pagination.page} of {pagination.pages} ({pagination.total} members)</span>
@@ -647,6 +616,7 @@ export default function MembersPage() {
               </div>
             )}
           </>
+        )}
         )}
 
         <div className="mt-8" style={{ textAlign:'center' }}>
